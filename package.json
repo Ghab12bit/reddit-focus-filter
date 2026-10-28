@@ -1,0 +1,9 @@
+{
+  "name": "reddit-focus-filter",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Chrome extension that hides off-topic posts from your Reddit feed using AI",
+  "scripts": { "test": "node tests/run.js" },
+  "devDependencies": { "jsdom": "^24.0.0" },
+  "license": "MIT"
+}

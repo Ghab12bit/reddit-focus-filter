@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Reddit Focus Settings</title>
+  <link rel="stylesheet" href="ui.css" />
+  <style>
+    main { max-width: 640px; margin: 40px auto; padding: 0 16px 60px; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    section { margin-top: 18px; }
+    section > .label { margin-bottom: 8px; display: block; }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .row { display: flex; gap: 10px; align-items: center; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .msg { font-size: 12px; margin-top: 8px; min-height: 18px; }
+    .ok { color: var(--accent); }
+    .bad { color: var(--warn); }
+    .actions { display: flex; gap: 10px; margin-top: 24px; align-items: center; }
+    ol { margin: 6px 0 0; padding-left: 18px; color: var(--muted); }
+    @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Reddit Focus</h1>
+  <div class="muted">Hides off-topic posts on your Reddit home, Popular and All feeds. Subreddit pages you open yourself are never filtered.</div>
+
+  <section class="card">
+    <span class="label">1. Free AI key (Groq)</span>
+    <div class="row">
+      <input id="apiKey" type="password" placeholder="gsk_..." autocomplete="off" />
+      <button class="ghost" id="test">Test</button>
+    </div>
+    <div class="msg" id="testMsg"></div>
+    <ol>
+      <li>Open <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a> and sign in with Google. No card needed.</li>
+      <li>Click "Create API Key", copy it, paste it above, click Test, then Save.</li>
+    </ol>
+    <div class="hint">Without a key the filter uses keywords only, which is much less accurate.</div>
+  </section>
+
+  <section class="card">
+    <span class="label">2. What you want to see</span>
+    <textarea id="interests" rows="7"></textarea>
+    <div class="hint">Plain English. The AI shows posts matching SHOW and hides the rest. Changing this re-checks your feed.</div>
+  </section>
+
+  <section class="card">
+    <span class="label">Hidden posts</span>
+    <select id="mode">
+      <option value="collapse">Collapse to a thin line (click to reveal)</option>
+      <option value="hide">Remove completely</option>
+    </select>
+  </section>
+
+  <section class="card">
+    <span class="label">Optional overrides</span>
+    <div class="grid">
+      <div>
+        <div class="muted">Always show subs</div>
+        <textarea id="alwaysShow" rows="4" placeholder="r/PPC&#10;r/n8n"></textarea>
+      </div>
+      <div>
+        <div class="muted">Always hide subs</div>
+        <textarea id="alwaysHide" rows="4" placeholder="r/gym&#10;r/oneplus"></textarea>
+      </div>
+    </div>
+    <div class="hint">Not required. The extension also learns: once a sub is judged off-topic 6 times in a row, it is hidden without asking the AI.</div>
+  </section>
+
+  <section class="card">
+    <span class="label">AI model</span>
+    <select id="model">
+      <option value="openai/gpt-oss-20b">GPT-OSS 20B (recommended, fast)</option>
+      <option value="openai/gpt-oss-120b">GPT-OSS 120B (smarter, slower)</option>
+    </select>
+  </section>
+
+  <div class="actions">
+    <button class="primary" id="save">Save</button>
+    <button class="ghost" id="reset">Reset learning</button>
+    <span class="msg" id="saveMsg"></span>
+  </div>
+</main>
+<script src="rules.js"></script>
+<script src="options.js"></script>
+</body>
+</html>

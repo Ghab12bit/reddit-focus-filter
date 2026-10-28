@@ -1,0 +1,43 @@
+/* Design system: dark neutral base (matches Reddit dark mode), one green accent for "signal",
+   grey for everything secondary. No red: filtering is not an error state. System font, two sizes. */
+:root {
+  --bg: #0e1113;
+  --surface: #1a1d21;
+  --border: #2a2f35;
+  --text: #e6e8ea;
+  --muted: #8b949e;
+  --accent: #3fb950;
+  --accent-ink: #0b1f10;
+  --warn: #d29922;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.5 var(--font); }
+.label { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+.muted { color: var(--muted); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button.primary {
+  background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 8px;
+  padding: 8px 14px; font: 600 13px var(--font); cursor: pointer;
+}
+button.ghost {
+  background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 14px; font: 13px var(--font); cursor: pointer;
+}
+button:hover { filter: brightness(1.1); }
+input, textarea, select {
+  width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 10px; font: 13px/1.5 var(--font);
+}
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); }
+textarea { resize: vertical; }
+
+/* Toggle switch */
+.switch { position: relative; width: 40px; height: 22px; flex: none; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; inset: 0; background: var(--border); border-radius: 999px; cursor: pointer; transition: 0.2s; }
+.slider::before { content: ""; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: var(--text); border-radius: 50%; transition: 0.2s; }
+.switch input:checked + .slider { background: var(--accent); }
+.switch input:checked + .slider::before { transform: translateX(18px); background: var(--accent-ink); }
