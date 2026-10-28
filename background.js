@@ -324,8 +324,10 @@ function sanitizePosts(posts) {
 }
 
 // Only this extension's own pages (popup, settings) may test keys or change settings.
+// Content scripts report the web page's URL (https://www.reddit.com/...), so the extension's own
+// origin can't be faked by them. Settings opens in a tab, so sender.tab is allowed.
 function fromOwnPage(sender) {
-  return sender.id === chrome.runtime.id && !sender.tab && String(sender.url || "").startsWith(chrome.runtime.getURL(""));
+  return sender.id === chrome.runtime.id && String(sender.url || "").startsWith(chrome.runtime.getURL(""));
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
