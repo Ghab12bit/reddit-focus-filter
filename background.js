@@ -123,6 +123,40 @@ function buildMessages(posts, interests) {
   ];
 }
 
+// ---------- quota tracking ----------
+// Groq returns live limits on every response:
+//   x-ratelimit-*-requests = requests per DAY, x-ratelimit-*-tokens = tokens per MINUTE.
+// Daily tokens aren't in the headers, so we count our own usage for that.
+const DAILY_TOKEN_LIMIT = 200000; // Groq free tier for gpt-oss-20b, Oct 2026
+
+function num(h, name) {
+  const v = parseFloat(h.get(name));
+  return Number.isFinite(v) ? v : null;
+}
+
+async function recordQuota(res, tokensUsed) {
+  const h = res.headers;
+  const { quota: prev } = await chrome.storage.local.get({ quota: null });
+  const sameDay = prev && prev.date === today();
+  const q = {
+    date: today(),
+    at: Date.now(),
+    reqLimit: num(h, "x-ratelimit-limit-requests"),
+    reqLeft: num(h, "x-ratelimit-remaining-requests"),
+    reqReset: String(h.get("x-ratelimit-reset-requests") || "").slice(0, 20),
+    tokLimit: num(h, "x-ratelimit-limit-tokens"),
+    tokLeft: num(h, "x-ratelimit-remaining-tokens"),
+    tokensToday: (sameDay ? prev.tokensToday || 0 : 0) + (tokensUsed || 0),
+    callsToday: (sameDay ? prev.callsToday || 0 : 0) + 1,
+    dailyTokenLimit: DAILY_TOKEN_LIMIT
+  };
+  // Keep the last known header values if this response didn't include them.
+  for (const k of ["reqLimit", "reqLeft", "reqReset", "tokLimit", "tokLeft"]) {
+    if ((q[k] === null || q[k] === "") && sameDay) q[k] = prev[k];
+  }
+  await chrome.storage.local.set({ quota: q });
+}
+
 // Optional request fields. If Groq rejects one (400), we retry without them once and remember.
 let useExtras = true;
 
@@ -169,6 +203,7 @@ async function callGroq(posts, settings) {
     }
   }
   if (res.status === 429) {
+    await recordQuota(res, 0);
     const ra = parseFloat(res.headers.get("retry-after")) || 20;
     cooldownUntil = Date.now() + ra * 1000;
     const err = new Error("Rate limited by Groq, try again in a minute");
@@ -177,6 +212,7 @@ async function callGroq(posts, settings) {
   }
   if (!res.ok) throw new Error(await errorText(res));
   const data = await res.json();
+  await recordQuota(res, (data.usage && data.usage.total_tokens) || 0);
   const content = data.choices && data.choices[0] && data.choices[0].message.content;
   return parseResults(content, posts.length);
 }
@@ -311,6 +347,21 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     testKey(key, str(msg.model, 60))
       .then((text) => sendResponse({ ok: true, text }))
       .catch((e) => sendResponse({ ok: false, error: str(String(e && e.message || e), 200) }));
+    return true;
+  }
+  if (msg.type === "checkQuota") {
+    if (!fromOwnPage(sender)) return false;
+    (async () => {
+      const s = await getSettings();
+      if (!s.apiKey || !s.apiKey.trim()) return sendResponse({ ok: false, error: "No API key saved" });
+      try {
+        // One tiny classification call; Groq's reply headers carry the live limits.
+        await enqueue(() => callGroq([{ id: "q", sub: "r/PPC", title: "quota check" }], s));
+        sendResponse({ ok: true });
+      } catch (e) {
+        sendResponse({ ok: false, error: str(String(e && e.message || e), 200) });
+      }
+    })();
     return true;
   }
   if (msg.type === "alwaysShow") {

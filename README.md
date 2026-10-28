@@ -53,6 +53,16 @@ If anything goes wrong, posts are shown, not hidden. The extension never blanks 
 
 See [SECURITY.md](SECURITY.md) for reporting issues.
 
+## Checking your free limit
+
+The toolbar popup shows a **Groq free limit** card:
+
+- **AI calls left today**, read live from the rate-limit headers Groq returns with every response
+- **Tokens used today**, counted by the extension against the 200,000/day free allowance (Groq doesn't report daily tokens in its headers)
+- **Check now** makes one tiny AI call to refresh the numbers
+
+Bars turn amber when less than 20% is left.
+
 ## Limits
 
 - Groq's free tier (as of October 2026) allows `gpt-oss-20b` 30 requests per minute, 1,000 per day and 8,000 tokens per minute. With batching, caching and learned subreddits that covers roughly 1,500 to 2,000 new posts a day.

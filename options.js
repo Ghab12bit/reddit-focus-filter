@@ -49,7 +49,12 @@ $("test").addEventListener("click", () => {
   flash($("testMsg"), "Testing...", true);
   chrome.runtime.sendMessage({ type: "test", apiKey, model: $("model").value }, (res) => {
     if (chrome.runtime.lastError || !res) return flash($("testMsg"), "Could not reach the extension. Reload it.", false);
-    if (res.ok) flash($("testMsg"), res.text + ". Now click Save.", true);
+    if (res.ok) {
+      // A working key is saved immediately, so forgetting to click Save can't leave you in keyword mode.
+      chrome.storage.local.set({ apiKey, model: $("model").value });
+      saved.apiKey = apiKey;
+      flash($("testMsg"), res.text + ". Key saved.", true);
+    }
     else flash($("testMsg"), "Failed: " + res.error, false);
   });
 });

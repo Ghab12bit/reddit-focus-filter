@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Reddit Focus Filter",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Hides off-topic posts from your Reddit home feed using AI. Read-only: never clicks, votes or calls Reddit.",
   "minimum_chrome_version": "116",
   "permissions": ["storage"],

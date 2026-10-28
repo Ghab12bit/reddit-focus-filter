@@ -17,7 +17,9 @@
     "ecommerce", "shopify", "dropship", "emailmarketing", "coldemail", "sales", "freelance",
     "upwork", "agency", "automation", "n8n", "zapier", "nocode", "ai_agents", "aiagents",
     "copywriting", "content_marketing", "socialmediamarketing", "growthhacking", "passive_income",
-    "workonline", "beermoney", "remotework", "digitalnomad", "growmybusiness", "affiliatemarketing"
+    "workonline", "beermoney", "remotework", "digitalnomad", "growmybusiness", "affiliatemarketing",
+    "claudeai", "claudecode", "aiautomations", "sideproject", "gohighlevel", "coldemailing",
+    "sidehustlegold", "leadgeneration", "b2bmarketing", "agencygrowthhacks"
   ];
 
   const POSITIVE = [

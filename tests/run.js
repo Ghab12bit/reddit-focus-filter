@@ -39,7 +39,8 @@ async function fakeFetch(url, opts) {
   if (!opts.headers.Authorization.includes("gsk_test")) throw new Error("bad auth header");
   const items = JSON.parse(body.messages[1].content);
   const results = items.map((it) => ({ id: it.id, show: /ads|business|n8n|client|cpl/i.test(it.title), why: "test reason" }));
-  return { ok: true, status: 200, headers: { get: () => null }, json: async () => ({ choices: [{ message: { content: JSON.stringify({ results }) } }] }) };
+  const H = { "x-ratelimit-limit-requests": "1000", "x-ratelimit-remaining-requests": String(1000 - fetchCalls), "x-ratelimit-reset-requests": "1m26.4s", "x-ratelimit-limit-tokens": "8000", "x-ratelimit-remaining-tokens": "7200" };
+  return { ok: true, status: 200, headers: { get: (n) => H[n] ?? null }, json: async () => ({ usage: { total_tokens: 700 }, choices: [{ message: { content: JSON.stringify({ results }) } }] }) };
 }
 
 const bgCtx = {
@@ -138,6 +139,11 @@ const expect = (name, got, want) => { const ok = got === want; if (!ok) fails++;
   await sleep(1500);
   expect("subreddit page not filtered", d.getElementById("t3_i").getAttribute("data-rf"), null);
 
+  // ---- quota tracking ----
+  expect("quota has request limit", store.quota && store.quota.reqLimit, 1000);
+  expect("quota counts tokens", store.quota.tokensToday > 0, true);
+  expect("quota reset text", store.quota.reqReset, "1m26.4s");
+
   // ---- security checks ----
   const ask = (msg, sender) => new Promise((res) => { const r = msgListener(msg, sender, res); if (!r) setTimeout(() => res("rejected"), 50); });
   const page = { id: "ext", tab: { id: 1 }, url: "https://www.reddit.com/" };
@@ -148,6 +154,7 @@ const expect = (name, got, want) => { const ok = got === want; if (!ok) fails++;
   const r = await ask({ type: "classify", posts: [{ id: "__proto__", sub: "r/x", title: "t" }, { id: "t3_z", sub: "r/__proto__!", title: "t" }, { id: "t3_ok", sub: "r/PPC", title: "x".repeat(5000) }] }, page);
   expect("bad ids/subs dropped", Object.keys(r.results).join(","), "t3_ok");
   expect("prototype untouched", ({}).v, undefined);
+  expect("content script cannot check quota", await ask({ type: "checkQuota" }, page), "rejected");
   expect("bad sub refused for alwaysShow", await ask({ type: "alwaysShow", sub: "r/<img src=x>" }, page), "rejected");
 
   console.log("stats", JSON.stringify(store.stats), "subStats", JSON.stringify(store.subStats));

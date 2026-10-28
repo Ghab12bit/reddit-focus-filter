@@ -4,15 +4,26 @@
   <meta charset="utf-8" />
   <link rel="stylesheet" href="ui.css" />
   <style>
-    body { width: 290px; padding: 14px; }
+    body { width: 300px; padding: 14px; }
     .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .big { font-size: 34px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
     .big.on { color: var(--accent); }
     .stack > * + * { margin-top: 12px; }
     .status { display: flex; align-items: center; gap: 8px; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
     .dot.ok { background: var(--accent); }
     .dot.warn { background: var(--warn); }
+
+    /* Quota meters: green while healthy, amber under 20% left. Numbers lead, bar confirms. */
+    .meter + .meter { margin-top: 10px; }
+    .meter-top { display: flex; justify-content: space-between; align-items: baseline; }
+    .meter-val { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .bar { height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; margin-top: 4px; }
+    .fill { height: 100%; width: 0; background: var(--accent); border-radius: 999px; transition: width 0.3s; }
+    .fill.low { background: var(--warn); }
+    .foot { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 11px; }
+    button.link { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; cursor: pointer; }
+    button.link:disabled { color: var(--muted); cursor: default; }
   </style>
 </head>
 <body class="stack">
@@ -28,6 +39,22 @@
     <div class="label">Hidden today</div>
     <div class="big on" id="hidden">0</div>
     <div class="muted" id="sub">of 0 posts checked</div>
+  </div>
+
+  <div class="card" id="quotaCard" hidden>
+    <div class="label" style="margin-bottom:8px">Groq free limit</div>
+    <div class="meter">
+      <div class="meter-top"><span class="muted">AI calls left today</span><span class="meter-val" id="reqVal">–</span></div>
+      <div class="bar"><div class="fill" id="reqBar"></div></div>
+    </div>
+    <div class="meter">
+      <div class="meter-top"><span class="muted">Tokens used today</span><span class="meter-val" id="tokVal">–</span></div>
+      <div class="bar"><div class="fill" id="tokBar"></div></div>
+    </div>
+    <div class="foot">
+      <span class="muted" id="quotaWhen">No AI calls yet today</span>
+      <button class="link" id="checkNow">Check now</button>
+    </div>
   </div>
 
   <div class="status"><span class="dot" id="dot"></span><span id="mode"></span></div>
